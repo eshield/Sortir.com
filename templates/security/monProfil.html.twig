@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<header>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="flash-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+</header>
+<body>
+
+{{ form_start(ParticipantForm) }}
+{{ form_widget(ParticipantForm) }}
+<button type="submit">create</button>
+
+{{ form_end(ParticipantForm) }}
+
+</body>
+</html>
