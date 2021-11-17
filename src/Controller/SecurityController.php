@@ -4,12 +4,16 @@ namespace App\Controller;
 
 use App\Entity\Participant;
 use App\Form\ProfilType;
+use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+
+
 
 class SecurityController extends AbstractController
 {
@@ -43,7 +47,7 @@ class SecurityController extends AbstractController
      * @IsGranted("ROLE_USER")
      * @route("/monProfil" , name="app_monProfil")
      */
-     public function monProfil(Request $request): Response {
+     public function monProfil(Request $request ): Response {
 
 
          $Participant = new Participant() ;
@@ -52,18 +56,21 @@ class SecurityController extends AbstractController
 
 
          if ($ParticipantForm->isSubmitted() && $ParticipantForm->isValid()) {
-             $entityManager = $this->getDoctrine()->getManager();
+
+             /** @var getUsername  $file */
              $file = $ParticipantForm->get('image')->getData();
              if ($file)
              {
                  // On renomme le fichier
-                 $newFilename = "-".$this.$this->getUser()->getUserIdentifier().".".$file->guessExtension;
+                 $newFilename = $Participant->getNom()."-".$this->getUser()->getUserIdentifier().".".$file->guessExtension();
                  $file->move($this->getParameter('upload_champ_entite_dir'), $newFilename);
+                 $Participant->setChamp($newFilename);
              }
-
+             $entityManager = $this->getDoctrine()->getManager();
+             $entityManager->persist($file);
              $entityManager->flush();
-             $this->addFlash('success', 'Idea successfully added!');
-             return $this->redirectToRoute('main') ;
+             $this->addFlash('success', 'Votre compte a été modifié avec sucess.');
+             return $this->redirectToRoute('app_monProfil') ;
          }
          return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() ]) ;
 
