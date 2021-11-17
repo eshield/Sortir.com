@@ -7,6 +7,16 @@
 </head>
 <header>
 
+
+    {% if  participant.image   %}
+
+        <img src="{{ asset('public/images/' ~ participant.getImage) }}">
+    {% else %}
+
+        <img src="{{ asset('public/images/base.png') }}">
+
+    {% endif %}
+
     {% for label, messages in app.flashes %}
         {% for message in messages %}
             <div class="flash-{{ label }}">
@@ -17,7 +27,7 @@
 </header>
 <body>
 
-{{ app.user.getUsername }}
+{{ participant.username }}
 
 {{ form_start(ParticipantForm) }}
 {{ form_widget(ParticipantForm) }}

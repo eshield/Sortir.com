@@ -17,15 +17,15 @@ class ProfilType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('username',TextType::class )
             ->add('email',EmailType::class)
             ->add('password' ,PasswordType::class)
             ->add('nom', TextType::class)
             ->add('prenom', TextType::class )
             ->add('telephone', TextType::class)
             ->add('image', FileType::class,
-                [ 'mapped' => false, // désactive le mappage avec le champ dans l'entité (qui attend une chaîne de caractère)
-                ]
-            )
+                [ 'mapped' => false,
+                ])
         ;
     }
 

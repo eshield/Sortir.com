@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Participant;
 use App\Form\ProfilType;
+use App\Repository\ParticipantRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -47,9 +48,10 @@ class SecurityController extends AbstractController
      * @IsGranted("ROLE_USER")
      * @route("/monProfil" , name="app_monProfil")
      */
-     public function monProfil(Request $request ): Response {
+     public function monProfil(Request $request ,EntityManagerInterface $entityManager): Response {
 
-
+         $participantProfil = $this->getDoctrine->getManager()->getRepository(Participant::class)->findOneById($this->getUser()->getUserIdentifier());
+         dump($participantProfil);
          $Participant = new Participant() ;
          $ParticipantForm = $this->createForm(ProfilType::class , $Participant);
          $ParticipantForm->handleRequest($request);
@@ -64,15 +66,15 @@ class SecurityController extends AbstractController
                  // On renomme le fichier
                  $newFilename = $Participant->getNom()."-".$this->getUser()->getUserIdentifier().".".$file->guessExtension();
                  $file->move($this->getParameter('upload_champ_entite_dir'), $newFilename);
-                 $Participant->setChamp($newFilename);
+                 $Participant->setImage($newFilename);
              }
              $entityManager = $this->getDoctrine()->getManager();
              $entityManager->persist($file);
              $entityManager->flush();
              $this->addFlash('success', 'Votre compte a été modifié avec sucess.');
-             return $this->redirectToRoute('app_monProfil') ;
+             return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ; ;
          }
-         return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() ]) ;
+         return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
 
 
 
