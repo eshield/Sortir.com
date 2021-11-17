@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Participant;
 use App\Form\ProfilType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,6 +40,7 @@ class SecurityController extends AbstractController
     }
 
     /**
+     * @IsGranted("ROLE_USER")
      * @route("/monProfil" , name="app_monProfil")
      */
      public function monProfil(Request $request): Response {
