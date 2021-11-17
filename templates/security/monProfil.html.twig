@@ -8,8 +8,7 @@
 <header>
 
 
-    {% if  participant.image   %}
-
+    {% if  participant.image  %}
         <img src="{{ asset('public/images/' ~ participant.getImage) }}">
     {% else %}
 
@@ -27,11 +26,11 @@
 </header>
 <body>
 
-{{ participant.username }}
+{{ participant.pseudo }}
 
 {{ form_start(ParticipantForm) }}
 {{ form_widget(ParticipantForm) }}
-<button type="submit">create</button>
+<button type="submit">Modifier</button>
 
 {{ form_end(ParticipantForm) }}
 

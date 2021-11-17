@@ -40,14 +40,14 @@ class CustomValidator {
     }
 
 
-    public function validateUsername(?string $username) : string {
+    public function validatePseudo(?string $pseudo) : string {
 
-        if (empty($username )) {
+        if (empty($pseudo )) {
             throw new InvalidArgumentException('VEUILLER SAISIR UN USERNAME.') ;
         }
 
 
-        return $username  ;
+        return $pseudo  ;
     }
 
 

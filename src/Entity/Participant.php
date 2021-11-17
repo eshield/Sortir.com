@@ -60,15 +60,16 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $actif;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $username;
-
+    
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $image;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $pseudo;
 
     public function getId(): ?int
     {
@@ -219,12 +220,7 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function setUsername(string $username): self
-    {
-        $this->username = $username;
 
-        return $this;
-    }
 
     public function getImage(): ?string
     {
@@ -234,6 +230,18 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     public function setImage(?string $image): self
     {
         $this->image = $image;
+
+        return $this;
+    }
+
+    public function getPseudo(): ?string
+    {
+        return $this->pseudo;
+    }
+
+    public function setPseudo(string $pseudo): self
+    {
+        $this->pseudo = $pseudo;
 
         return $this;
     }

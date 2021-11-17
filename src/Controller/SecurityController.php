@@ -9,8 +9,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\HttpClient\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
@@ -25,7 +27,7 @@ class SecurityController extends AbstractController
     {
 
       if ($this->getUser()) {
-          return $this->redirectToRoute('/');
+          return $this->redirectToRoute('app_monProfil');
         }
 
         // get the login error if there is one
@@ -48,12 +50,11 @@ class SecurityController extends AbstractController
      * @IsGranted("ROLE_USER")
      * @route("/monProfil" , name="app_monProfil")
      */
-     public function monProfil(Request $request ,EntityManagerInterface $entityManager): Response {
+     public function monProfil(Request $request ,EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response {
 
-         $participantProfil = $this->getDoctrine->getManager()->getRepository(Participant::class)->findOneById($this->getUser()->getUserIdentifier());
-         dump($participantProfil);
-         $Participant = new Participant() ;
-         $ParticipantForm = $this->createForm(ProfilType::class , $Participant);
+         $participantProfil = $this->getDoctrine()->getManager()->getRepository(Participant::class)->findOneById($this->getUser()->getId());
+         dump($participantProfil->getPseudo());
+         $ParticipantForm = $this->createForm(ProfilType::class , $participantProfil);
          $ParticipantForm->handleRequest($request);
 
 
@@ -63,13 +64,28 @@ class SecurityController extends AbstractController
              $file = $ParticipantForm->get('image')->getData();
              if ($file)
              {
+
                  // On renomme le fichier
-                 $newFilename = $Participant->getNom()."-".$this->getUser()->getUserIdentifier().".".$file->guessExtension();
+                 $newFilename = $participantProfil->getNom()."-".$this->getUser()->getUserIdentifier().".".$file->guessExtension();
                  $file->move($this->getParameter('upload_champ_entite_dir'), $newFilename);
-                 $Participant->setImage($newFilename);
+                 $participantProfil->setImage($newFilename);
+
              }
+             $this->validateEmail($participantProfil->getEmail());
+             $this->validatePassword($participantProfil->getPassword());
+
+
+
+
+
+
+
+
+             $plainPassword =  $participantProfil->getPassword();
+             $hashPassword = $passwordHasher->hashPassword($participantProfil,$plainPassword);
+             $participantProfil->setPassword($hashPassword);
              $entityManager = $this->getDoctrine()->getManager();
-             $entityManager->persist($file);
+             $entityManager->persist($participantProfil);
              $entityManager->flush();
              $this->addFlash('success', 'Votre compte a été modifié avec sucess.');
              return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ; ;
@@ -80,6 +96,52 @@ class SecurityController extends AbstractController
 
 
      }
+
+
+
+    public function validateEmail(?string $email) : string {
+
+        if (empty($email )) {
+            throw new InvalidArgumentException('VEUILLER SAISIR UN EMAIL.');
+        }
+        if(!filter_var($email , FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('EMAIL SAISIE INVALIDE.');
+        }
+        return $email ;
+    }
+
+    public function validatePassword(?string $password) : string {
+
+        if (empty($password )) {
+            throw new InvalidArgumentException('VEUILLER SAISIR UN MOT DE PASSE.') ;
+            throw new Exception('EMAIL SAISIE INVALIDE.');
+            return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil,'error' => $error]) ; ;
+
+        }
+
+        $passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$^" ;
+        if(preg_match( $passwordRegex ,  $password )) {
+            throw new InvalidArgumentException('LE MOT DE PASSE DOIT CONTENIR 8 CARACTERE AU MINIMUM 
+            : DONT UNE LETTRE MAJUSCULE
+            , UNE LETTRE MINUSCULE 
+            , ET UN NOMBRE ');
+            return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil,'error' => $error]) ; ;
+        }
+        return $password  ;
+    }
+
+
+    public function validatePseudo(?string $pseudo) : string {
+
+        if (empty($pseudo )) {
+            throw new InvalidArgumentException('VEUILLER SAISIR UN USERNAME.') ;
+        }
+
+
+        return $pseudo  ;
+    }
+
+
 
 
 

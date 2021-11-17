@@ -31,7 +31,7 @@ class CreateUserCommand extends Command
         $this
             ->setDescription('crée un utilisateur')
             ->addArgument('email', InputArgument::REQUIRED, "Email de l 'utilisateur ")
-            ->addArgument('username', InputArgument::REQUIRED, "username de l 'utilisateur ")
+            ->addArgument('pseudo', InputArgument::REQUIRED, "pseudo de l 'utilisateur ")
             ->addArgument('Password', InputArgument::REQUIRED, "mot de passe de l'utilisateur ")
             ->addArgument('role', InputArgument::REQUIRED, "role de l'utilisateur ")
             ->addArgument('actif', InputArgument::REQUIRED, "statut du compte de l'utilisateur ")
@@ -60,7 +60,7 @@ class CreateUserCommand extends Command
    {
       $this->io->section("crée un utilisateur");
       $this->enterEmail($input,$output);
-      $this->enterUsername($input,$output);
+      $this->enterPseudo($input,$output);
       $this->enterPassword($input,$output);
       $this->enterRole($input,$output);
       $this->enterActif($input,$output);
@@ -84,8 +84,8 @@ class CreateUserCommand extends Command
         /** @var array<string> $role */
         $role = [$input->getArgument('role')];
 
-        /** @var string $username */
-        $username = $input->getArgument('username');
+        /** @var string $pseudo */
+        $pseudo = $input->getArgument('pseudo');
 
         /** @var boolean $actif */
         $actif = $input->getArgument('actif');
@@ -103,7 +103,7 @@ class CreateUserCommand extends Command
         $Participant ->setEmail($email)
                      ->setPassword($hashPassword)
                      ->setRoles($role)
-                     ->setUsername($username)
+                     ->setPseudo($pseudo)
                      ->setActif($actif)
                      ->setAdministrateur($admin);
 
@@ -168,19 +168,19 @@ class CreateUserCommand extends Command
     }
 
     /**
-     * set participant username
+     * set participant pseudo
      * @param InputInterface $input
      * @param OutputInterface $output
      */
-    private function enterUsername(InputInterface $input, OutputInterface $output) : void {
+    private function enterPseudo(InputInterface $input, OutputInterface $output) : void {
         $helper = $this->getHelper('question') ;
-        $UsernameQuestion = new Question("username de l'utilisateur : ");
-        $UsernameQuestion->setValidator([$this->Validator,'validateUsername']);
-        $username = $helper->ask($input , $output ,$UsernameQuestion ) ;
-        if($this->isUsernameAlreadyExist($username)){
-            throw new RuntimeException(sprintf('utilisateur déja present avec cette username : %s',$username));
+        $PseudoQuestion = new Question("pseudo de l'utilisateur : ");
+        $PseudoQuestion->setValidator([$this->Validator,'validatePseudo']);
+        $pseudo = $helper->ask($input , $output ,$PseudoQuestion ) ;
+        if($this->isPseudoAlreadyExist($pseudo)){
+            throw new RuntimeException(sprintf('utilisateur déja present avec cette pseudo : %s',$pseudo));
         }
-        $input->setArgument('username' , $username);
+        $input->setArgument('pseudo' , $pseudo);
 
     }
 
@@ -221,9 +221,9 @@ class CreateUserCommand extends Command
 
 
 
-    private function isUsernameAlreadyExist(String $username): ?user
+    private function isPseudoAlreadyExist(String $pseudo): ?user
     {
-        return $this->ParticipantRepository->findOneBy(['username' => $username ]);
+        return $this->ParticipantRepository->findOneBy(['pseudo' => $pseudo ]);
     }
 
 
