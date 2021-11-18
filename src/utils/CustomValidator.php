@@ -28,13 +28,11 @@ class CustomValidator {
         }
 
         $passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$^" ;
-       if(preg_match( $passwordRegex ,  $password )) {
-
+       if(!preg_match( $passwordRegex ,  $password )) {
            throw new InvalidArgumentException('LE MOT DE PASSE DOIT CONTENIR 8 CARACTERE AU MINIMUM 
             : DONT UNE LETTRE MAJUSCULE
             , UNE LETTRE MINUSCULE 
             , ET UN NOMBRE ') ;
-
        }
         return $password  ;
     }

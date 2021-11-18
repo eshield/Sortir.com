@@ -1,24 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+{% extends 'base.html.twig' %}
 
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<header>
+{% block main %}
 
-
-    {% if  participant.image  %}
-        <img src="{{ asset('public/images/' ~ participant.getImage) }}">
-    {% else %}
-
-        <img src="{{ asset('public/images/base.png') }}">
-
-    {% endif %}
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success">
+        {{ message }}
+    </div>
+{% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-warning">
+            {{ message }}
+        </div>
+    {% endfor %}
 
     {% for label, messages in app.flashes %}
         {% for message in messages %}
-            <div class="flash-{{ label }}">
+            <div class="alert alert-danger">
                 {{ message }}
             </div>
         {% endfor %}
@@ -26,13 +23,24 @@
 </header>
 <body>
 
-{{ participant.pseudo }}
+{% if   participant.image  %}
+    <img src="{{ asset('images/' ~ participant.image) }}"  style="width: 225px; "  >
 
+{% else %}
+    <img src="{{ asset('images/base.png') }}" style="width: 225px;" class=" ">
+
+
+{% endif %}
+
+
+<div class="text-center"       style="font-weight: bold;"> Mon profil </div>
 {{ form_start(ParticipantForm) }}
 {{ form_widget(ParticipantForm) }}
 <button type="submit">Modifier</button>
 
 {{ form_end(ParticipantForm) }}
 
-</body>
-</html>
+
+
+{% endblock %}
+

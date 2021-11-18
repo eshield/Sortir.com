@@ -19,6 +19,17 @@ class CampusRepository extends ServiceEntityRepository
         parent::__construct($registry, Campus::class);
     }
 
+
+    public function FindAllCampus()
+    {
+       $entityManger = $this->getEntityManager();
+           $dql ="SELECT C FROM Campus   ";
+            $query = $entityManger->createQuery($dql);
+            return $query->getResult() ;
+    }
+
+
+
     // /**
     //  * @return Campus[] Returns an array of Campus objects
     //  */

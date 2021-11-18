@@ -6,8 +6,10 @@ use App\Entity\Participant;
 use App\Form\ProfilType;
 use App\Repository\ParticipantRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use phpDocumentor\Reflection\Types\Void_;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\HttpClient\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +22,9 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
+
+private $erreur = 0;
+
     /**
      * @Route("/login", name="app_login")
      */
@@ -46,38 +51,51 @@ class SecurityController extends AbstractController
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
+
+
     /**
      * @IsGranted("ROLE_USER")
      * @route("/monProfil" , name="app_monProfil")
      */
-     public function monProfil(Request $request ,EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response {
-
+     public function monProfil(Request $request ,UserPasswordHasherInterface $passwordHasher , ParticipantRepository $ParticipantRepository): Response {
+         $emailUser = $this->getUser()->getUserIdentifier();
+         $pseudoUser = $this->getUser()->getPseudo();
+         $this->erreur = 0 ;
          $participantProfil = $this->getDoctrine()->getManager()->getRepository(Participant::class)->findOneById($this->getUser()->getId());
-         dump($participantProfil->getPseudo());
          $ParticipantForm = $this->createForm(ProfilType::class , $participantProfil);
          $ParticipantForm->handleRequest($request);
-
+         dump($this->getUser()) ;
 
          if ($ParticipantForm->isSubmitted() && $ParticipantForm->isValid()) {
 
+
+
              /** @var getUsername  $file */
              $file = $ParticipantForm->get('image')->getData();
-             if ($file)
-             {
-
-                 // On renomme le fichier
-                 $newFilename = $participantProfil->getNom()."-".$this->getUser()->getUserIdentifier().".".$file->guessExtension();
-                 $file->move($this->getParameter('upload_champ_entite_dir'), $newFilename);
-                 $participantProfil->setImage($newFilename);
-
-             }
-             $this->validateEmail($participantProfil->getEmail());
-             $this->validatePassword($participantProfil->getPassword());
 
 
 
 
+             $this->validateEmail($participantProfil->getEmail() ,$emailUser);
+             $this->validatePassword($participantProfil->getPassword() );
+             $this->veriftel($participantProfil->getTelephone());
+             $this->validatePseudo($participantProfil->getPseudo()  ,$pseudoUser );
 
+             if($this->erreur === 0 ) {
+
+                 if ($file)
+                 {
+                     $filesystem = new Filesystem();
+
+                     // On renomme le fichier
+                     $newFilename = $participantProfil->getNom()."-".$this->getUser()->getUserIdentifier().".".$file->guessExtension();
+
+                     //on supprime si un fichier porte le meme nom
+                     $filesystem->remove($newFilename);
+                     $file->move($this->getParameter('upload_champ_entite_dir'), $newFilename);
+                     $participantProfil->setImage($newFilename);
+
+                 }
 
 
 
@@ -88,7 +106,10 @@ class SecurityController extends AbstractController
              $entityManager->persist($participantProfil);
              $entityManager->flush();
              $this->addFlash('success', 'Votre compte a été modifié avec sucess.');
-             return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ; ;
+             return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
+             }
+             else
+                 return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
          }
          return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
 
@@ -99,48 +120,85 @@ class SecurityController extends AbstractController
 
 
 
-    public function validateEmail(?string $email) : string {
+    public function validateEmail(string $email , string $userEmail) : void {
 
         if (empty($email )) {
-            throw new InvalidArgumentException('VEUILLER SAISIR UN EMAIL.');
+            $this->addFlash('error', 'EMAIL VIDE  ');
+            $this->erreur =+ 1 ;
         }
         if(!filter_var($email , FILTER_VALIDATE_EMAIL)) {
-            throw new Exception('EMAIL SAISIE INVALIDE.');
+            $this->addFlash('error', 'EMAIL INCORRECTE ');
+            $this->erreur =+ 1 ;
         }
-        return $email ;
+        dump($email) ;
+        dump($userEmail);
+        $Entity = $this->getDoctrine()->getManager()->getRepository(Participant::class)->findOneBy(['email'=> $email])->getEmail() ;
+        if($Entity != $userEmail && $Entity != null  ) {
+            $this->addFlash('error', 'EMAIL DEJA UTILISEE ');
+            $this->erreur =+ 1 ;
+        }
     }
 
-    public function validatePassword(?string $password) : string {
 
-        if (empty($password )) {
-            throw new InvalidArgumentException('VEUILLER SAISIR UN MOT DE PASSE.') ;
-            throw new Exception('EMAIL SAISIE INVALIDE.');
-            return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil,'error' => $error]) ; ;
-
+    public function validatePseudo(string $pseudo , string $userPseudo) : void {
+        if (empty($pseudo )) {
+            $this->addFlash('error', 'PSEUDO VIDE  ');
+            $this->erreur =+ 1 ;
         }
 
+
+            try{
+                $Entity = $this->getDoctrine()->getManager()->getRepository(Participant::class)->findOneBy(['pseudo'=> $pseudo])->getPseudo() ;
+            }
+            catch(\Exception $e){
+                error_log($e->getMessage());
+                $Entity = true ;
+            }
+
+        if($Entity != $userPseudo && $Entity != null  ) {
+            $this->addFlash('error', 'PSEUDO DEJA UTILISEE ');
+            $this->erreur =+ 1 ;
+        }
+    }
+
+
+    public function validatePassword(string $password ) : void {
         $passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$^" ;
-        if(preg_match( $passwordRegex ,  $password )) {
-            throw new InvalidArgumentException('LE MOT DE PASSE DOIT CONTENIR 8 CARACTERE AU MINIMUM 
+
+
+
+        if (empty($password )) {
+            $this->addFlash('error', 'mot de passe vide ');
+            $this->erreur =+ 1 ;
+        }
+
+        if(!preg_match( $passwordRegex ,  $password ))  {
+            $this->addFlash('error', 'LE MOT DE PASSE DOIT CONTENIR 8 CARACTERE AU MINIMUM 
             : DONT UNE LETTRE MAJUSCULE
             , UNE LETTRE MINUSCULE 
             , ET UN NOMBRE ');
-            return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil,'error' => $error]) ; ;
+            $this->erreur =+ 1 ;
+
+
         }
-        return $password  ;
     }
 
 
-    public function validatePseudo(?string $pseudo) : string {
 
-        if (empty($pseudo )) {
-            throw new InvalidArgumentException('VEUILLER SAISIR UN USERNAME.') ;
+
+    public function veriftel(?string $tel) : void {
+      $telRegex= "^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$^";
+        if (empty($tel )) {
+            $this->addFlash('error', 'LE NUMERO DE TELEPHONE EST 10 CHIFFRE MINIMUM');
+            $this->erreur =+ 1 ;
+        }
+        if(!preg_match( $telRegex ,  $tel ))  {
+            $this->addFlash('error', 'LE NUMERO DE TELEPHONE EST 10 CHIFFRE MINIMUM');
+            $this->erreur =+ 1 ;
         }
 
 
-        return $pseudo  ;
     }
-
 
 
 

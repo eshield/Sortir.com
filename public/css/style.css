@@ -1,1 +1,11 @@
 @import "~bootstrap/scss/bootstrap.scss";
+
+flash-success {
+    background-color :limegreen ;
+    color: #FFFFFF;
+}
+flash-error {
+    color: #FFFFFF;
+    background-color :firebrick ;
+
+}
