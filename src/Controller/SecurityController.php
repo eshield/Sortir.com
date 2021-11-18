@@ -121,7 +121,7 @@ private $erreur = 0;
 
 
     public function validateEmail(string $email , string $userEmail) : void {
-
+        $emailSearch = null ;
         if (empty($email )) {
             $this->addFlash('error', 'EMAIL VIDE  ');
             $this->erreur =+ 1 ;
@@ -130,10 +130,12 @@ private $erreur = 0;
             $this->addFlash('error', 'EMAIL INCORRECTE ');
             $this->erreur =+ 1 ;
         }
-        dump($email) ;
-        dump($userEmail);
-        $Entity = $this->getDoctrine()->getManager()->getRepository(Participant::class)->findOneBy(['email'=> $email])->getEmail() ;
-        if($Entity != $userEmail && $Entity != null  ) {
+
+        $Entity = $this->getDoctrine()->getManager()->getRepository(Participant::class)->findOneBy(['email'=> $email]);
+        if($Entity){
+            $emailSearch = $Entity->getEmail() ;
+        }
+        if($email != $userEmail && $emailSearch != null  ) {
             $this->addFlash('error', 'EMAIL DEJA UTILISEE ');
             $this->erreur =+ 1 ;
         }
@@ -141,21 +143,18 @@ private $erreur = 0;
 
 
     public function validatePseudo(string $pseudo , string $userPseudo) : void {
+        $pseudoSearch = null ;
+
         if (empty($pseudo )) {
             $this->addFlash('error', 'PSEUDO VIDE  ');
             $this->erreur =+ 1 ;
         }
+                $Entity = $this->getDoctrine()->getManager()->getRepository(Participant::class)->findOneBy(['pseudo'=> $pseudo]);
+                if($Entity){
+                    $pseudoSearch = $Entity->getPseudo() ;
+                }
 
-
-            try{
-                $Entity = $this->getDoctrine()->getManager()->getRepository(Participant::class)->findOneBy(['pseudo'=> $pseudo])->getPseudo() ;
-            }
-            catch(\Exception $e){
-                error_log($e->getMessage());
-                $Entity = true ;
-            }
-
-        if($Entity != $userPseudo && $Entity != null  ) {
+        if($pseudo != $userPseudo && $pseudoSearch != null  ) {
             $this->addFlash('error', 'PSEUDO DEJA UTILISEE ');
             $this->erreur =+ 1 ;
         }

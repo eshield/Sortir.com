@@ -1,5 +1,5 @@
 {% extends 'base.html.twig' %}
-
+{% block title %}Mon Profil {% endblock %}
 {% block main %}
 
 {% for message in app.flashes('success') %}
@@ -22,16 +22,16 @@
     {% endfor %}
 </header>
 <body>
-
+<div class="text-center" >
 {% if   participant.image  %}
-    <img src="{{ asset('images/' ~ participant.image) }}"  style="width: 225px; "  >
+    <img  src="{{ asset('images/' ~ participant.image) }}"  style="width: 225px; "  >
 
 {% else %}
     <img src="{{ asset('images/base.png') }}" style="width: 225px;" class=" ">
 
 
 {% endif %}
-
+</div>
 
 <div class="text-center"       style="font-weight: bold;"> Mon profil </div>
 {{ form_start(ParticipantForm) }}

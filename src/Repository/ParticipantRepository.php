@@ -22,6 +22,9 @@ class ParticipantRepository extends ServiceEntityRepository implements PasswordU
         parent::__construct($registry, Participant::class);
     }
 
+
+
+
     /**
      * Used to upgrade (rehash) the user's password automatically over time.
      */
