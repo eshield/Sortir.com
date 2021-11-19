@@ -3,7 +3,8 @@
 {% block title %}Se connecter{% endblock %}
 
 {% block main %}
-<form method="post">
+    <div class="container mb-4 col-6" >
+    <form method="post">
     {% if error %}
         <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
     {% endif %}
@@ -38,4 +39,5 @@
         Sign in
     </button>
 </form>
+     </div>
 {% endblock %}

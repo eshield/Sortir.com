@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 {% block title %}Mon Profil {% endblock %}
 {% block main %}
-
+<div class="container mb-4">
 {% for message in app.flashes('success') %}
     <div class="alert alert-success">
         {{ message }}
@@ -40,6 +40,6 @@
 
 {{ form_end(ParticipantForm) }}
 
-
+</div>
 {% endblock %}
 

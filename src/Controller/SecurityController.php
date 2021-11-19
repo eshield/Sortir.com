@@ -112,17 +112,15 @@ private $erreur = 0;
              $this->addFlash('success', 'Votre compte a été modifié avec sucess.');
              return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
              }
-             else
+             else {
+
                  $participantProfil->setEmail($emailUser);
-             $participantProfil->setPassword($emailpass);
-              $participantProfil->setPseudo($pseudoUser);
-
-
-
-                 return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
+                 $participantProfil->setPassword($emailpass);
+                 $participantProfil->setPseudo($pseudoUser);
+                return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
+             }
          }
-         dump($participant);
-        $participantProfil   = $participant  ;
+
          return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
 
 
