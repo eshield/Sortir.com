@@ -60,8 +60,12 @@ private $erreur = 0;
      public function monProfil(Request $request ,UserPasswordHasherInterface $passwordHasher , ParticipantRepository $ParticipantRepository): Response {
          $emailUser = $this->getUser()->getUserIdentifier();
          $pseudoUser = $this->getUser()->getPseudo();
+         $emailpass = $this->getUser()->getPassword();
          $this->erreur = 0 ;
+
          $participantProfil = $this->getDoctrine()->getManager()->getRepository(Participant::class)->findOneById($this->getUser()->getId());
+          $participant =   $participantProfil;
+            dump($participant);
          $ParticipantForm = $this->createForm(ProfilType::class , $participantProfil);
          $ParticipantForm->handleRequest($request);
          dump($this->getUser()) ;
@@ -109,8 +113,16 @@ private $erreur = 0;
              return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
              }
              else
+                 $participantProfil->setEmail($emailUser);
+             $participantProfil->setPassword($emailpass);
+              $participantProfil->setPseudo($pseudoUser);
+
+
+
                  return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
          }
+         dump($participant);
+        $participantProfil   = $participant  ;
          return $this->render('security/monProfil.html.twig' , ['ParticipantForm' => $ParticipantForm->createView() , 'participant'=>$participantProfil]) ;
 
 
