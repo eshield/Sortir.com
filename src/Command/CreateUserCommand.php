@@ -160,7 +160,7 @@ class CreateUserCommand extends Command
      */
     private function enterRole(InputInterface $input, OutputInterface $output) : void {
         $helper = $this->getHelper('question') ;
-        $roleQuestion = new ChoiceQuestion("SELECTIONNER LE ROLE DE L'UTILISATEUR : ['ROLE_USER'] " ,['ROLE_USER'] , 'ROLE_USER');
+        $roleQuestion = new ChoiceQuestion("SELECTIONNER LE ROLE DE L'UTILISATEUR : ['ROLE_USER'] " ,['ROLE_USER' , 'ROLE_ADMIN' ] , 'ROLE_USER');
         $roleQuestion->setErrorMessage('ROLE UTILISATEUR INVALIDE');
         $role = $helper->ask($input , $output ,$roleQuestion ) ;
         $output->writeln("<info>role de l'utilisateur choisit : {$role}</info>") ;
@@ -221,13 +221,13 @@ class CreateUserCommand extends Command
 
 
 
-    private function isPseudoAlreadyExist(String $pseudo): ?user
+    private function isPseudoAlreadyExist(String $pseudo): ?Participant
     {
         return $this->ParticipantRepository->findOneBy(['pseudo' => $pseudo ]);
     }
 
 
-    private function isUserAlreadyExist(String $email): ?user
+    private function isUserAlreadyExist(String $email): ?Participant
     {
         return $this->ParticipantRepository->findOneBy(['email' => $email ]);
     }

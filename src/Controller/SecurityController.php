@@ -26,7 +26,7 @@ class SecurityController extends AbstractController
 private $erreur = 0;
 
     /**
-     * @Route("/login", name="app_login")
+     * @Route("/", name="app_login")
      */
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
@@ -127,6 +127,21 @@ private $erreur = 0;
 
 
      }
+
+
+
+    /**
+     * @IsGranted("ROLE_USER")
+     * @route("/profil/{pseudo}", name="app_Profil")
+     */
+    public function AfficherProfil(ParticipantRepository $participantRepository,string $pseudo ): Response
+    {
+        $participant =   $participantRepository->findOneBy(['pseudo' => $pseudo ]);
+        dump($participant) ;
+        return $this->render('security/Profil.html.twig' , ['participant'=>$participant]) ;
+    }
+
+
 
 
 

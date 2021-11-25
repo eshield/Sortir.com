@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Participant;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManager;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -38,6 +39,33 @@ class ParticipantRepository extends ServiceEntityRepository implements PasswordU
         $this->_em->persist($user);
         $this->_em->flush();
     }
+
+    public function PseudoNoAdmin()
+    {
+       $quueryBuilder = $this->createQueryBuilder('p');
+       $quueryBuilder->andWhere('p.administrateur = 0');
+       $query = $quueryBuilder->getQuery();
+       $result = $query->getResult();
+       return  $result ;
+
+    }
+
+    public function deleteByPpseudo(string $pseudo)
+    {
+
+        $qb =  $this->getEntityManager();
+        $query = $qb->createQueryBuilder();
+        $query->delete();
+        $query->where('pseudo = :pseudo');
+        $query->setParameter('pseudo', $pseudo);
+        $query->getQuery()->execute();
+
+    }
+
+
+
+
+
 
     // /**
     //  * @return Participant[] Returns an array of Participant objects
